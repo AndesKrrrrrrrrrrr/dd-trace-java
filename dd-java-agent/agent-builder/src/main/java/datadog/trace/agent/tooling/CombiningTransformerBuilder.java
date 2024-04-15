@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.asm.AsmVisitorWrapper;
@@ -130,7 +131,10 @@ public final class CombiningTransformerBuilder
     }
     helperTransformer =
         helperClassNames.length > 0
-            ? new HelperTransformer(module.getClass().getSimpleName(), helperClassNames)
+            ? new HelperTransformer(
+                module::createHelperClassesProtectionDomain,
+                module.getClass().getSimpleName(),
+                helperClassNames)
             : null;
 
     muzzle = new MuzzleCheck(module, instrumentationId);
@@ -347,8 +351,11 @@ public final class CombiningTransformerBuilder
   }
 
   static final class HelperTransformer extends HelperInjector implements AgentBuilder.Transformer {
-    HelperTransformer(String requestingName, String... helperClassNames) {
-      super(requestingName, helperClassNames);
+    HelperTransformer(
+        Function<ClassLoader, ProtectionDomain> protectionDomainFactory,
+        String requestingName,
+        String... helperClassNames) {
+      super(protectionDomainFactory, requestingName, helperClassNames);
     }
   }
 

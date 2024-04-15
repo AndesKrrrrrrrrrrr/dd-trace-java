@@ -15,10 +15,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Function;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.dynamic.loading.ClassInjector;
+import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 import net.bytebuddy.utility.JavaModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +29,12 @@ import org.slf4j.LoggerFactory;
 public class HelperInjector implements Instrumenter.TransformingAdvice {
   private static final Logger log = LoggerFactory.getLogger(HelperInjector.class);
 
+  private static final Function<ClassLoader, ProtectionDomain> DEFAULT_PROTECTION_DOMAIN_FACTORY =
+      cl -> ClassLoadingStrategy.NO_PROTECTION_DOMAIN;
+
   private final String requestingName;
 
+  private final Function<ClassLoader, ProtectionDomain> protectionDomainFactory;
   private final Set<String> helperClassNames;
   private final Map<String, byte[]> dynamicTypeMap = new LinkedHashMap<>();
 
@@ -46,12 +52,20 @@ public class HelperInjector implements Instrumenter.TransformingAdvice {
    *     requires them to be injected in a specific order.
    */
   public HelperInjector(final String requestingName, final String... helperClassNames) {
-    this.requestingName = requestingName;
+    this(DEFAULT_PROTECTION_DOMAIN_FACTORY, requestingName, helperClassNames);
+  }
 
+  public HelperInjector(
+      Function<ClassLoader, ProtectionDomain> protectionDomainFactory,
+      final String requestingName,
+      final String... helperClassNames) {
+    this.protectionDomainFactory = protectionDomainFactory;
+    this.requestingName = requestingName;
     this.helperClassNames = new LinkedHashSet<>(Arrays.asList(helperClassNames));
   }
 
   public HelperInjector(final String requestingName, final Map<String, byte[]> helperMap) {
+    this.protectionDomainFactory = DEFAULT_PROTECTION_DOMAIN_FACTORY;
     this.requestingName = requestingName;
 
     helperClassNames = helperMap.keySet();
@@ -135,7 +149,9 @@ public class HelperInjector implements Instrumenter.TransformingAdvice {
       final ClassLoader classLoader, final Map<String, byte[]> classnameToBytes) {
     INJECTING_HELPERS.begin();
     try {
-      return new ClassInjector.UsingReflection(classLoader).injectRaw(classnameToBytes);
+      ProtectionDomain protectionDomain = protectionDomainFactory.apply(classLoader);
+      return new ClassInjector.UsingReflection(classLoader, protectionDomain)
+          .injectRaw(classnameToBytes);
     } finally {
       INJECTING_HELPERS.end();
     }

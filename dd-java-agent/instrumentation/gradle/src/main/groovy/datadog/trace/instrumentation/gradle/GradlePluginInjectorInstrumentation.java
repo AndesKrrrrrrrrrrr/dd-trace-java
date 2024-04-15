@@ -6,6 +6,8 @@ import com.google.auto.service.AutoService;
 import datadog.trace.agent.tooling.Instrumenter;
 import datadog.trace.agent.tooling.InstrumenterModule;
 import datadog.trace.api.Config;
+import java.security.CodeSource;
+import java.security.ProtectionDomain;
 import java.util.Set;
 import net.bytebuddy.matcher.ElementMatcher;
 
@@ -56,6 +58,13 @@ public class GradlePluginInjectorInstrumentation extends InstrumenterModule.CiVi
       packageName + ".CiVisibilityPluginExtension",
       packageName + ".CiVisibilityPlugin"
     };
+  }
+
+  @Override
+  public ProtectionDomain createHelperClassesProtectionDomain(ClassLoader classLoader) {
+    CodeSource codeSource =
+        GradlePluginInjectorInstrumentation.class.getProtectionDomain().getCodeSource();
+    return new ProtectionDomain(codeSource, null, classLoader, null);
   }
 
   @Override

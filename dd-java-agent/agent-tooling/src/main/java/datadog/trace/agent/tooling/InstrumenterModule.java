@@ -16,12 +16,14 @@ import datadog.trace.api.config.ProfilingConfig;
 import datadog.trace.bootstrap.config.provider.ConfigProvider;
 import datadog.trace.util.Strings;
 import de.thetaphi.forbiddenapis.SuppressForbidden;
+import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
+import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 import net.bytebuddy.matcher.ElementMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,6 +108,11 @@ public abstract class InstrumenterModule implements Instrumenter {
   /** @return Class names of helpers to inject into the user's classloader */
   public String[] helperClassNames() {
     return new String[0];
+  }
+
+  /** @return ProtectionDomain of the injected helper classes */
+  public ProtectionDomain createHelperClassesProtectionDomain(ClassLoader classLoader) {
+    return ClassLoadingStrategy.NO_PROTECTION_DOMAIN;
   }
 
   /** Override this to automatically inject all (non-bootstrap) helper dependencies. */
