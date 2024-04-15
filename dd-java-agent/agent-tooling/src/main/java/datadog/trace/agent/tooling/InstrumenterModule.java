@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
@@ -111,8 +112,8 @@ public abstract class InstrumenterModule implements Instrumenter {
   }
 
   /** @return ProtectionDomain of the injected helper classes */
-  public ProtectionDomain createHelperClassesProtectionDomain(ClassLoader classLoader) {
-    return ClassLoadingStrategy.NO_PROTECTION_DOMAIN;
+  public Function<ClassLoader, ProtectionDomain> helperClassesProtectionDomainFactory() {
+    return cl -> ClassLoadingStrategy.NO_PROTECTION_DOMAIN;
   }
 
   /** Override this to automatically inject all (non-bootstrap) helper dependencies. */

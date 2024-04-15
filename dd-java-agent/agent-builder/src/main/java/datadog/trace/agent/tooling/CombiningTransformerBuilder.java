@@ -132,7 +132,7 @@ public final class CombiningTransformerBuilder
     helperTransformer =
         helperClassNames.length > 0
             ? new HelperTransformer(
-                module::createHelperClassesProtectionDomain,
+                module.helperClassesProtectionDomainFactory(),
                 module.getClass().getSimpleName(),
                 helperClassNames)
             : null;

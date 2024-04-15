@@ -9,6 +9,7 @@ import datadog.trace.api.Config;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.Set;
+import java.util.function.Function;
 import net.bytebuddy.matcher.ElementMatcher;
 
 @AutoService(InstrumenterModule.class)
@@ -61,10 +62,12 @@ public class GradlePluginInjectorInstrumentation extends InstrumenterModule.CiVi
   }
 
   @Override
-  public ProtectionDomain createHelperClassesProtectionDomain(ClassLoader classLoader) {
-    CodeSource codeSource =
-        GradlePluginInjectorInstrumentation.class.getProtectionDomain().getCodeSource();
-    return new ProtectionDomain(codeSource, null, classLoader, null);
+  public Function<ClassLoader, ProtectionDomain> helperClassesProtectionDomainFactory() {
+    return cl -> {
+      CodeSource codeSource =
+          GradlePluginInjectorInstrumentation.class.getProtectionDomain().getCodeSource();
+      return new ProtectionDomain(codeSource, null, cl, null);
+    };
   }
 
   @Override
