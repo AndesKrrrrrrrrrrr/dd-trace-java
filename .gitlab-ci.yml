@@ -55,8 +55,7 @@ cache:
   - key: $CI_PIPELINE_ID # Incremental build cache. Shared by all jobs in the pipeline
     paths:
       - .gradle/caches/8.4 # must match gradle-wrapper.properties
-      - workspace/build-cache
-      - workspace/**/build/**
+      - workspace
     policy: $BUILD_CACHE_POLICY
 
 .gradle_build: &gradle_build
