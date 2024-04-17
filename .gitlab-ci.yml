@@ -63,6 +63,10 @@ cache:
   image: ghcr.io/datadog/dd-trace-java-docker-build:v23.10-base
   before_script:
     - export GRADLE_USER_HOME=`pwd`/.gradle
+    - ls -l
+    - pwd
+    - ls -l .gradle
+    - ls -l workspace
 
 build: &build
   <<: *gradle_build
