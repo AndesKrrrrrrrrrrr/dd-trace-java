@@ -1,0 +1,56 @@
+plugins {
+  id "com.github.johnrengelman.shadow"
+}
+
+// Set properties before any plugins get loaded
+ext {
+  minJavaVersionForTests = JavaVersion.VERSION_17
+
+  // need access to jdk.jfr package
+  skipSettingCompilerRelease = true
+
+  excludeJdk = ['SEMERU17']
+}
+
+apply from: "$rootDir/gradle/java.gradle"
+apply plugin: 'idea'
+
+java {
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(17)
+  }
+}
+
+dependencies {
+  api project(':internal-api')
+  implementation deps.slf4j
+
+  testImplementation deps.mockito
+  testImplementation deps.junit5
+}
+
+excludedClassesCoverage += ['datadog.trace.agent.jfrmetrics.JFRMetrics*']
+
+
+// Shared JFR implementation. The earliest Java version JFR is working on is Java 8
+
+tasks.named("compileTestJava").configure {
+  setJavaVersion(it, 17)
+  // Disable '-processing' because some annotations are not claimed.
+  // Disable '-options' because we are compiling for java8 without specifying bootstrap - intentionally.
+  // Disable '-path' because we do not have some of the paths seem to be missing.
+  options.compilerArgs.addAll(['-Xlint:all,-processing,-options,-path'/*, '-Werror'*/])
+}
+
+forbiddenApisMain {
+  failOnMissingClasses = false
+}
+
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
+
+idea {
+  module {
+    jdkName = '17'
+  }
+}
