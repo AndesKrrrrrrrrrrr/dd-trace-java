@@ -49,8 +49,8 @@ cache: &default_cache
   before_script:
     - export GRADLE_USER_HOME=`pwd`/.gradle
     - mkdir -p .gradle/wrapper .gradle/caches
-    - ls -l
-    - chmod -R a+rwX .gradle
+    - ls -la
+#    - chmod -R a+rwX .gradle
 
 build: &build
   <<: *gradle_build
