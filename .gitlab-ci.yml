@@ -48,10 +48,7 @@ cache: &default_cache
   image: ghcr.io/datadog/dd-trace-java-docker-build:v23.10-base
   before_script:
     - export GRADLE_USER_HOME=`pwd`/.gradle
-    - mkdir fakebin
-    - touch fakebin/chmod
-    - chmod +x fakebin/chmod
-    - export PATH=`pwd`/fakebin:$PATH
+    - sudo chmod -R a+rwX .gradle
 
 build: &build
   <<: *gradle_build
