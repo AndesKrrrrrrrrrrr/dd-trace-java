@@ -48,7 +48,12 @@ cache: &default_cache
   image: ghcr.io/datadog/dd-trace-java-docker-build:v23.10-base
   before_script:
     - export GRADLE_USER_HOME=`pwd`/.gradle
-    - sudo chmod -R a+rwX .gradle
+    - mkdir -p .gradle
+    - cp -r .gradle .gradle-copy
+    - ls -la
+    - rm -rf .gradle
+    - ls -la
+    - cp -r .gradle-copy .gradle
     - ls -la
 
 build: &build
